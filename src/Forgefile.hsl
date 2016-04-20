@@ -1,0 +1,25 @@
+
+# Description: This script implements a recursive forge.
+
+include ~/toolsets/null/null.hsl
+include ~/toolsets/utils/forge_projects.hsl
+include ~/fsutil.hsl
+
+project mr-hyde-stuffs : toolset "no-tool-any-set" : 0;
+
+var exit_code type int;
+
+mr-hyde-stuffs.prologue() {
+    var mr_hyde_root type list;
+    $mr_hyde_root = lsdir();
+    $exit_code = forge_projects($mr_hyde_root);
+}
+
+mr-hyde-stuffs.epilogue() {
+    if ($exit_code == 0) {
+        hefesto.sys.echo("___\n*** Success, take a look at ../bin subdirectory, all stuff is there.\n");
+    } else {
+        hefesto.sys.echo("___\n~~~ Failure.\n");
+    }
+    hefesto.sys.exit($exit_code);
+}

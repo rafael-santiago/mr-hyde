@@ -1,0 +1,1 @@
+--forgefiles=Forgefile.hsl --Forgefile-projects=vegas --obj-output-dir=o --bin-output-dir=../../../bin --includes=accacia/src --libraries=accacia/bin --ldflags=-laccacia

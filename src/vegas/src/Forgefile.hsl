@@ -1,0 +1,43 @@
+include ~/toolsets/gcc/gcc-app.hsl
+include ~/toolsets/common/utils/lang/c/dependency_scanner.hsl
+
+var src type list;
+var includes_directories type list;
+var cflags type list;
+var libraries_directories type list;
+var ldflags type list;
+var deps type string;
+
+function forge_accacia() : result type int {
+    var oldcwd type string;
+    $oldcwd = hefesto.sys.pwd();
+    if (hefesto.sys.cd("accacia/src") != 1) {
+        result 1;
+    }
+    hefesto.sys.forge("accacia", "Forgefile.hsl", "--obj-output-dir=obj --bin-output-dir=../bin --compile-model=release --link-model=static");
+    hefesto.sys.cd($oldcwd);
+    result hefesto.sys.last_forge_result();
+}
+
+project vegas : toolset "gcc-c-app" : dependencies $deps : $src, $includes_directories, $cflags, $libraries_directories, $ldflags, "vegas";
+
+vegas.prologue() {
+    var exit_code type int;
+    $exit_code = forge_accacia();
+    if ($exit_code != 0) {
+        hefesto.project.abort($exit_code);
+    }
+    $includes_directories = hefesto.sys.get_option("includes");
+    $libraries_directories = hefesto.sys.get_option("libraries");
+    $ldflags = hefesto.sys.get_option("ldflags");
+    $src.ls(".*\\.c$");
+    $deps = get_c_cpp_deps();
+}
+
+vegas.epilogue() {
+    if (hefesto.sys.last_forge_result() == 0) {
+        hefesto.sys.echo("*** Forge success.\n");
+    } else {
+        hefesto.sys.echo("~~~ Forge error.\n");
+    }
+}
