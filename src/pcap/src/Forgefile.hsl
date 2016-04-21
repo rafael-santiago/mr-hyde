@@ -1,0 +1,22 @@
+include ~/toolsets/gcc/gcc-app.hsl
+include ~/toolsets/common/utils/lang/c/dependency_scanner.hsl
+
+var src type list;
+var incpath type list;
+var cflags type list;
+var libpath type list;
+var ldflags type list;
+
+project pcap : toolset "gcc-c-app" : dependencies get_c_cpp_deps() : $src, $incpath, $cflags, $libpath, $ldflags, "pcap";
+
+pcap.prologue() {
+    $src.ls(".*\\.c$");
+}
+
+pcap.epilogue() {
+    if (hefesto.sys.last_forge_result() == 0) {
+        hefesto.sys.echo("___\n*** SUCCESS.\n");
+    } else {
+        hefesto.sys.echo("___\n~~~ FAILURE.\n");
+    }
+}

@@ -1,5 +1,5 @@
 
-# Description: This script implements a recursive forge.
+# Description: This script implements a recursive forge. Run it and you will get all subproject's binaries.
 
 include ~/toolsets/null/null.hsl
 include ~/toolsets/utils/forge_projects.hsl
