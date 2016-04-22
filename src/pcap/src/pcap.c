@@ -115,3 +115,7 @@ static void del_pcap_record_ctx(pcap_record_ctx *recs) {
         free(p);
     }
 }
+
+int save_pcap_file(const pcap_file_ctx *file) {
+    return 0;
+}

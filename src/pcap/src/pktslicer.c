@@ -5,7 +5,7 @@ struct pkt_field_boundaries {
     const char *name;
     size_t start_off, end_off;
     unsigned int mask;
-    unsigned int lsh;
+    unsigned int rsh;
 };
 
 // INFO(Santiago): This states the slicer behavior for each relevant packet field.
@@ -40,6 +40,25 @@ const struct pkt_field_boundaries g_pkt_fields[] = {
 
 const size_t g_pkt_fields_size = sizeof(g_pkt_fields[0]) / sizeof(g_pkt_fields);
 
+void set_pkt_field(const char *field, unsigned char *buf, size_t buf_size, const unsigned int value) {
+    size_t p = 0;
+    const unsigned char *buf_end = NULL;
+    unsigned int *slice = NULL;
+    if (field == NULL || buf == NULL) {
+        return;
+    }
+    buf_end = buf + buf_size;
+    for (p = 0; p < g_pkt_fields_size; p++) {
+        if (strcmp(g_pkt_fields[p].name, field) == 0) {
+            if (buf + g_pkt_fields[p].start_off + (g_pkt_fields[p].end_off - g_pkt_fields[p].start_off) > buf_end) {
+                return;
+            }
+        }
+        slice = ((unsigned int *)buf + g_pkt_fields[p].start_off);
+        *slice |= value << g_pkt_fields[p].rsh;
+    }
+}
+
 void *get_pkt_field(const char *field, const unsigned char *buf, size_t buf_size, size_t *field_size) {
     size_t p = 0;
     const unsigned char *buf_end = NULL;
@@ -57,7 +76,7 @@ void *get_pkt_field(const char *field, const unsigned char *buf, size_t buf_size
             if (field_size != NULL) {
                 *field_size = g_pkt_fields[p].end_off - g_pkt_fields[p].start_off;
             }
-            slice = (slice & g_pkt_fields[p].mask) >> g_pkt_fields[p].lsh;
+            slice = (slice & g_pkt_fields[p].mask) >> g_pkt_fields[p].rsh;
             return &slice;
         }
     }
