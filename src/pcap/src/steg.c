@@ -1,7 +1,9 @@
 #include "steg.h"
 #include "types.h"
 #include "pktslicer.h"
+#include "memory.h"
 #include <stdio.h>
+#include <string.h>
 
 #define get_bit_from_byte(bb, b) ( ( ( (bb) >> (7 - b) ) & 1 ) )
 
@@ -80,6 +82,58 @@ int hide_buf(const char *input_buffer, size_t input_buffer_size, pcap_file_ctx *
     return 1;
 }
 
-char *recover_buf(pcap_file_ctx *pcap_file, size_t *ouput_size) {
-    return NULL;
+char *recover_buf(pcap_file_ctx *pcap_file, size_t *output_size) {
+    char *plaintext = NULL, *p = NULL;
+    pcap_record_ctx *rp = NULL;
+    size_t b = 0;
+    size_t plaintext_size = 0;
+    unsigned int *data = NULL;
+    if (pcap_file == NULL) {
+        return NULL;
+    }
+    rp = pcap_file->rec;
+    while (rp != NULL && b < (sizeof(plaintext_size) * 8)) {
+        data = get_pkt_field("eth.type", rp->data, rp->hdr.incl_len, NULL);
+        if (data == NULL || *data != 0x0800) {
+            continue;
+        }
+        data = get_pkt_field("ip.proto", rp->data, rp->hdr.incl_len, NULL);
+        if (data == NULL || *data != 6) {
+            continue;
+        }
+        data = get_pkt_field("tcp.reserv", rp->data, rp->hdr.incl_len, NULL);
+        if (data == NULL) {
+            continue;
+        }
+        plaintext_size = plaintext_size << 1 | ((*data) & 1);
+        b++;
+        rp = rp->next;
+    }
+    b = 0;
+    plaintext = (char *) getseg(plaintext_size + 1);
+    memset(plaintext, 0, plaintext_size + 1);
+    p = plaintext;
+    while (rp != NULL && b < (plaintext_size * 8)) {
+        data = get_pkt_field("eth.type", rp->data, rp->hdr.incl_len, NULL);
+        if (data == NULL || *data != 0x0800) {
+            continue;
+        }
+        data = get_pkt_field("ip.proto", rp->data, rp->hdr.incl_len, NULL);
+        if (data == NULL || *data != 6) {
+            continue;
+        }
+        data = get_pkt_field("tcp.reserv", rp->data, rp->hdr.incl_len, NULL);
+        if (data == NULL) {
+            continue;
+        }
+        *p = (*p) << 1 | ((*data) & 1);
+        b = (b + 1) % plaintext_size;
+        if ((b % 8) == 0) {
+            p++;
+        }
+    }
+    if (output_size != NULL) {
+        *output_size = plaintext_size;
+    }
+    return plaintext;
 }
