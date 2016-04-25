@@ -2,3 +2,7 @@
 	path = src/tty/src/accacia
 	url = https://github.com/rafael-santiago/accacia
 	branch = master
+[submodule "src/pcap/src/tests/cutest"]
+	path = src/pcap/src/tests/cutest
+	url = https://github.com/rafael-santiago/cutest
+	branch = master

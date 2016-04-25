@@ -117,5 +117,17 @@ static void del_pcap_record_ctx(pcap_record_ctx *recs) {
 }
 
 int save_pcap_file(const pcap_file_ctx *file) {
-    return 0;
+    FILE *fp = NULL;
+    pcap_record_ctx *rp = NULL;
+    fp = fopen(file->path, "wb");
+    if (fp == NULL) {
+        return 0;
+    }
+    fwrite(&file->hdr, 1, sizeof(file->hdr), fp);
+    for (rp = file->rec; rp != NULL; rp = rp->next) {
+        fwrite(&rp->hdr, 1, sizeof(rp->hdr), fp);
+        fwrite(&rp->data, 1, rp->hdr.incl_len, fp);
+    }
+    fclose(fp);
+    return 1;
 }

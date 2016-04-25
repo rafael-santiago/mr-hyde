@@ -14,9 +14,23 @@ pcap.prologue() {
 }
 
 pcap.epilogue() {
+    var code type int;
+    $code = 1;
     if (hefesto.sys.last_forge_result() == 0) {
         hefesto.sys.echo("___\n*** SUCCESS.\n");
+        $code = runtests();
     } else {
         hefesto.sys.echo("___\n~~~ FAILURE.\n");
     }
+    hefesto.sys.exit($code);
+}
+
+function runtests() : result type int {
+    var return type int;
+    var oldcwd type string;
+    $oldcwd = hefesto.sys.pwd();
+    hefesto.sys.cd("tests");
+    $return = hefesto.sys.forge("tests", "Forgefile.hsl", "--obj-output-dir=o --bin-output-dir=bin --includes=cutest/src --libraries=cutest/src/lib --ldflags=-lcutest,-ldl");
+    hefesto.sys.cd($oldcwd);
+    result $return;
 }
