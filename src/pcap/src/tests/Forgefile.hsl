@@ -19,6 +19,7 @@ tests.prologue() {
     if (hefesto.sys.os_name() != "linux") {
         $ldflags.del_item("-ldl");
     }
+    get_master_project_objects($ldflags);
 }
 
 tests.epilogue() {
@@ -42,4 +43,30 @@ function forge_libcutest() : result type none {
     if (hefesto.sys.last_forge_result() != 0) {
         hefesto.project.abort(1);
     }
+}
+
+function get_master_project_objects(ldflags type list) : result type none {
+    var obj_dir type list;
+    $obj_dir = hefesto.sys.get_option("master-project-obj-dir");
+    if ($obj_dir.count() > 0) {
+        var oldcwd type string;
+        $oldcwd = hefesto.sys.pwd();
+        hefesto.sys.cd($obj_dir.item(0));
+        $ldflags.ls(".*\\.o$");
+        hefesto.sys.cd($oldcwd);
+    } else {
+        $ldflags.ls(".*\\.o$");
+    }
+    var l type int;
+    $l = 0;
+    while ($l < $ldflags.count()) {
+        var item type string;
+        $item = $ldflags.item($l);
+        if ($item.match(".*main\\.o$") != 0) {
+            $ldflags.del_item($item);
+            break;
+        }
+        $l = $l + 1;
+    }
+    hefesto.sys.byref($ldflags);
 }

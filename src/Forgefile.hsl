@@ -17,7 +17,7 @@ mr-hyde-stuffs.prologue() {
 
 mr-hyde-stuffs.epilogue() {
     if ($exit_code == 0) {
-        hefesto.sys.echo("___\n*** Success, take a look at ../bin subdirectory, all stuff is there.\n");
+        hefesto.sys.echo("___\n*** Success, take a look at ../bin subdirectory, all stuff are there.\n");
     } else {
         hefesto.sys.echo("___\n~~~ Failure.\n");
     }

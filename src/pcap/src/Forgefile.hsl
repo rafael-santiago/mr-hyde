@@ -30,7 +30,7 @@ function runtests() : result type int {
     var oldcwd type string;
     $oldcwd = hefesto.sys.pwd();
     hefesto.sys.cd("tests");
-    $return = hefesto.sys.forge("tests", "Forgefile.hsl", "--obj-output-dir=o --bin-output-dir=bin --includes=cutest/src --libraries=cutest/src/lib --ldflags=-lcutest,-ldl");
+    $return = hefesto.sys.forge("tests", "Forgefile.hsl", "--obj-output-dir=o --bin-output-dir=bin --includes=cutest/src --libraries=cutest/src/lib --ldflags=-lcutest,-ldl --master-project-obj-dir=../o");
     hefesto.sys.cd($oldcwd);
     result $return;
 }
