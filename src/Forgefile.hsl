@@ -1,6 +1,11 @@
-
+#
+#                                Copyright (C) 2016 by Rafael Santiago
+#
+# This is a free software. You can redistribute it and/or modify under
+# the terms of the GNU General Public License version 2.
+#
 # Description: This script implements a recursive forge. Run it and you will get all subproject's binaries.
-
+#
 include ~/toolsets/null/null.hsl
 include ~/toolsets/utils/forge_projects.hsl
 include ~/fsutil.hsl

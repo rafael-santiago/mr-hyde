@@ -1,5 +1,6 @@
 #include "pcap.h"
 #include "memory.h"
+#include "steg.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -102,7 +103,28 @@ ___hide_fini:
 }
 
 int recover(const int argc, char **argv) {
-    return 1;
+    char *option_data = NULL;
+    char *outbuf = NULL;
+    size_t outbuf_size = 0;
+    pcap_file_ctx *pcap = NULL;
+    int exit_code = 1;
+    if ((option_data = get_option("pcap-file", argc, argv)) == NULL) {
+        printf("ERROR: The pcap file was not supplied. Use the option --pcap-file=<filepath>.\n");
+        return 1;
+    }
+    if ((pcap = ld_pcap_file(option_data)) == NULL) {
+        printf("ERROR: Unable to open \"%s\".\n", option_data);
+        return 1;
+    }
+    outbuf = recover_buf(pcap, &outbuf_size);
+    exit_code = (outbuf == NULL);
+    if (exit_code != 0) {
+        printf("ERROR: Some error has happened during the recovering process.\n");
+    } else {
+        fwrite(outbuf, 1, outbuf_size, stdout);
+    }
+    close_pcap_file(pcap);
+    return exit_code;
 }
 
 int help(const int argc, char **argv) {

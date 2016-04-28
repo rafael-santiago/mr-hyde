@@ -1,6 +1,8 @@
 #include "pktslicer.h"
 #include <string.h>
 
+#define get_byte_from_u32(v, b) ( ( (v) >> ( 24 - ( (b) * 8 ) ) ) & 0xff )
+
 struct pkt_field_boundaries {
     const char *name;
     size_t start_off, end_off;
@@ -10,7 +12,7 @@ struct pkt_field_boundaries {
 };
 
 // INFO(Santiago): This states the slicer behavior for each relevant packet field.
-//                 The basic "gear" for this kind of "machine" is: ( ( ( pkt + start_off ) & mask ) >> lsh )
+//                 The basic "gear" for this kind of "machine" is: ( ( ( pkt + start_off ) & mask ) >> rsh )
 const struct pkt_field_boundaries g_pkt_fields[] = {
     { "eth.dst",     0,  5, 0xffffffff,  0, 6 },
     { "eth.src",     6, 11, 0xffffffff,  0, 6 },
@@ -41,9 +43,7 @@ const struct pkt_field_boundaries g_pkt_fields[] = {
 
 const size_t g_pkt_fields_size = sizeof(g_pkt_fields) / sizeof(g_pkt_fields[0]);
 
-static int little_endian();
-
-static int little_endian() {
+int little_endian() {
     unsigned int m = 0x00000001;
     return (*(&m) & 1);
 }
@@ -51,7 +51,10 @@ static int little_endian() {
 void set_pkt_field(const char *field, unsigned char *buf, size_t buf_size, const unsigned int value) {
     size_t p = 0;
     const unsigned char *buf_end = NULL;
+    unsigned char *bp = NULL;
     unsigned int *slice = NULL;
+    unsigned int temp_value = value;
+    int b = 0, byte_nr = 0;
     if (field == NULL || buf == NULL) {
         return;
     }
@@ -61,9 +64,13 @@ void set_pkt_field(const char *field, unsigned char *buf, size_t buf_size, const
             if (buf + g_pkt_fields[p].start_off + (g_pkt_fields[p].end_off - g_pkt_fields[p].start_off) > buf_end) {
                 return;
             }
+            bp = buf + g_pkt_fields[p].start_off;
+            byte_nr = sizeof(value) - 1;
+            for (b = 0; b < g_pkt_fields[p].size && bp != buf_end; b++, bp++, byte_nr--) {
+                *bp = get_byte_from_u32(value, byte_nr);
+            }
+            return;
         }
-        slice = ((unsigned int *)buf + g_pkt_fields[p].start_off);
-        *slice |= value << g_pkt_fields[p].rsh;
     }
 }
 
