@@ -108,6 +108,7 @@ int recover(const int argc, char **argv) {
     size_t outbuf_size = 0;
     pcap_file_ctx *pcap = NULL;
     int exit_code = 1;
+    FILE *fp = NULL;
     if ((option_data = get_option("pcap-file", argc, argv)) == NULL) {
         printf("ERROR: The pcap file was not supplied. Use the option --pcap-file=<filepath>.\n");
         return 1;
@@ -121,8 +122,26 @@ int recover(const int argc, char **argv) {
     if (exit_code != 0) {
         printf("ERROR: Some error has happened during the recovering process.\n");
     } else {
-        fwrite(outbuf, 1, outbuf_size, stdout);
+        if ((option_data = get_option("output-file", argc, argv)) != NULL) {
+            fp = fopen(option_data, "wb");
+            if (fp == NULL) {
+                printf("ERROR: Unable to create the file \"%s\".\n", option_data);
+                exit_code = 1;
+                goto ___recover_fini;
+            }
+        } else {
+            fp = stdout;
+        }
+        fwrite(outbuf, 1, outbuf_size, fp);
+        if (fp == stdout) {
+            printf("\n");
+        }
     }
+___recover_fini:
+    if (fp != stdout) {
+        fclose(fp);
+    }
+    free(outbuf);
     close_pcap_file(pcap);
     return exit_code;
 }

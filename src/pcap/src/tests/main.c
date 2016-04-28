@@ -4,12 +4,44 @@
 #include "../pktslicer.h"
 #include "../pcap.h"
 #include "../steg.h"
+#include "../chsum.h"
 
-//void printp(unsigned char *p, size_t ps) {
-//    size_t s;
-//    for (s = 0; s < ps; s++) printf("%.2x ", p[s]);
-//    printf("\n");
-//}
+void printp(unsigned char *p, size_t ps) {
+    size_t s;
+    for (s = 0; s < ps; s++) printf("%.2x ", p[s]);
+    printf("\n");
+}
+
+CUTE_TEST_CASE(chsum_tests)
+    unsigned char ip_packet[] = {
+        "\x45\x00\x00\x34\xc8\xc5\x40\x00\x3a\x06\x00\x00\x17\x2d\xdc\x5e\xc0\xa8\x01\x4b"
+    };
+    size_t ip_packet_size = 20;
+    unsigned char tcp_packet[] = {
+        "\x00\x50\x04\x59\x60\x26\x26\xa7\xba\x84\x24\x9b\x80\x10"
+        "\x03\x9c\x00\x00\x00\x00\x01\x01\x05\x0a\xba\x84\x24\x9a"
+        "\xba\x84\x24\x9b"
+    };
+    size_t tcp_packet_size = 32;
+    unsigned char wire_buf[] = {
+        "\x5c\xac\x4c\xaa\xf5\xb5\x08\x95\x2a\xad\xd6\x4f\x08\x00\x45\x00"
+        "\x00\x34\xc8\xc5\x40\x00\x3a\x06\xff\xff\x17\x2d\xdc\x5e\xc0\xa8"
+        "\x01\x4b\x00\x50\x04\x59\x60\x26\x26\xa7\xba\x84\x24\x9b\x80\x10"
+        "\x03\x9c\xff\xff\x00\x00\x01\x01\x05\x0a\xba\x84\x24\x9a\xba\x84"
+        "\x24\x9b"
+    };
+    size_t wire_buf_size = 66;
+    unsigned char *chsum = NULL;
+    CUTE_ASSERT(ip_chsum(ip_packet, ip_packet_size) == 0xc27f);
+    unsigned short c;
+    CUTE_ASSERT(tcp_chsum(tcp_packet, tcp_packet_size, "\x17\x2d\xdc\x5e", 4, "\xc0\xa8\x01\x4b", 4, 32) == 0x97cd);
+    reval_tcp_ip_chsums(wire_buf, wire_buf_size);
+    chsum = get_pkt_field("ip.chsum", wire_buf, wire_buf_size, NULL);
+    CUTE_ASSERT(chsum != NULL && *chsum == 0xc2 && *(chsum + 1) == 0x7f);
+    chsum = get_pkt_field("tcp.chsum", wire_buf, wire_buf_size, NULL);
+    CUTE_ASSERT(chsum != NULL && *chsum == 0x97 && *(chsum + 1) == 0xcd);
+CUTE_TEST_CASE_END
+
 
 CUTE_TEST_CASE(pcap_loading_tests)
     FILE *pcap = fopen("pcap-test.pcap", "wb");
@@ -382,6 +414,7 @@ CUTE_TEST_CASE(run_tests)
     CUTE_RUN_TEST(pktslicer_get_pkt_field_tests);
     CUTE_RUN_TEST(pktslicer_set_pkt_field_tests);
     CUTE_RUN_TEST(pcap_loading_tests);
+    CUTE_RUN_TEST(chsum_tests);
     CUTE_RUN_TEST(steg_tests);
 CUTE_TEST_CASE_END
 

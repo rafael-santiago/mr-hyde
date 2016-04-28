@@ -126,7 +126,7 @@ int save_pcap_file(const pcap_file_ctx *file) {
     fwrite(&file->hdr, 1, sizeof(file->hdr), fp);
     for (rp = file->rec; rp != NULL; rp = rp->next) {
         fwrite(&rp->hdr, 1, sizeof(rp->hdr), fp);
-        fwrite(&rp->data, 1, rp->hdr.incl_len, fp);
+        fwrite(rp->data, 1, rp->hdr.incl_len, fp);
     }
     fclose(fp);
     return 1;

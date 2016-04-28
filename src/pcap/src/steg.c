@@ -1,7 +1,9 @@
 #include "steg.h"
 #include "types.h"
+#include "endianess.h"
 #include "pktslicer.h"
 #include "memory.h"
+#include "chsum.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -78,7 +80,7 @@ int hide_buf(const char *input_buffer, size_t input_buffer_size, pcap_file_ctx *
             }
             bit = get_bit_from_byte(*ip, b);
             set_pkt_field("tcp.reserv", rp->data, rp->hdr.incl_len, (bit == 0) ? 0x80 : 0x81);
-            // TODO(Santiago): refresh tcp and ip checksum.
+            reval_tcp_ip_chsums(rp->data, rp->hdr.incl_len);
             b = (b+1) % 8;
             if (b == 0) {
                 ip++;

@@ -7,6 +7,4 @@ void set_pkt_field(const char *field, unsigned char *buf, size_t buf_size, const
 
 void *get_pkt_field(const char *field, const unsigned char *buf, size_t buf_size, size_t *field_size);
 
-int little_endian();
-
 #endif

@@ -1,4 +1,5 @@
 #include "pktslicer.h"
+#include "endianess.h"
 #include <string.h>
 
 #define get_byte_from_u32(v, b) ( ( (v) >> ( 24 - ( (b) * 8 ) ) ) & 0xff )
@@ -42,11 +43,6 @@ const struct pkt_field_boundaries g_pkt_fields[] = {
 };
 
 const size_t g_pkt_fields_size = sizeof(g_pkt_fields) / sizeof(g_pkt_fields[0]);
-
-int little_endian() {
-    unsigned int m = 0x00000001;
-    return (*(&m) & 1);
-}
 
 void set_pkt_field(const char *field, unsigned char *buf, size_t buf_size, const unsigned int value) {
     size_t p = 0;
