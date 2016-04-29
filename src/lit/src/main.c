@@ -222,7 +222,7 @@ int hide_stuff(int argc, char **argv) {
     char *output_path = NULL;
     char *cover_path = NULL;
     size_t input_buf_size = 0;
-    if ((option = get_option("input-path", argv, argc)) != NULL) {
+    if ((option = get_option("input-file", argv, argc)) != NULL) {
         fp = fopen(option, "rb");
         if (fp == NULL) {
             printf("ERROR: unable to open the file \"%s\".\n", option);
@@ -240,24 +240,19 @@ int hide_stuff(int argc, char **argv) {
     } else if ((input_buf = get_option("input-buf", argv, argc)) != NULL) {
         input_buf_size = strlen(input_buf);
     } else {
-        printf("OPTION PARSING ERROR: --input-path=<filepath> or --input-buf=<data> must be supplied.\n");
+        printf("OPTION PARSING ERROR: --input-file=<filepath> or --input-buf=<data> must be supplied.\n");
         return 1;
     }
-    output_path = get_option("output-path", argv, argc);
+    output_path = get_option("output-file", argv, argc);
     if (output_path == NULL) {
-        printf("OPTION PARSING ERROR: --output-path=<filepath> must be supplied.\n");
+        printf("OPTION PARSING ERROR: --output-file=<filepath> must be supplied.\n");
         return 1;
     }
-    cover_path = get_option("cover-path", argv, argc);
+    cover_path = get_option("cover-file", argv, argc);
     if (cover_path == NULL) {
-        printf("OPTION PARSING ERROR: --cover-path=<filepath> must be supplied.\n");
+        printf("OPTION PARSING ERROR: --cover-file=<filepath> must be supplied.\n");
         return 1;
     }
-/*    if (strcmp(input_path, cover_path) == 0 || strcmp(output_path, input_path) == 0 ||
-        strcmp(cover_path, output_path) == 0) {
-        printf("ERROR: --cover-path, --input-path and --output-path must point to different files.\n");
-        return 1;
-    }*/
     exit_code = hide(input_buf, input_buf_size, cover_path, output_path);
     if (fp != NULL) {
         fclose(fp);
@@ -272,14 +267,14 @@ int recover_stuff(int argc, char **argv) {
     FILE *fp = NULL;
     FILE *op = stdout;
     int exit_code = 1;
-    input_path = get_option("input-path", argv, argc);
+    input_path = get_option("input-file", argv, argc);
     if (input_path == NULL) {
-        printf("OPTION PARSING ERROR: --input-path=<filepath> must be supplied.\n");
+        printf("OPTION PARSING ERROR: --input-file=<filepath> must be supplied.\n");
         return 1;
     }
-    output_path = get_option("output-path", argv, argc);
+    output_path = get_option("output-file", argv, argc);
     if (output_path != NULL && strcmp(input_path, output_path) == 0) {
-        printf("ERROR: --input-path and --output-path must point to different files.\n");
+        printf("ERROR: --input-file and --output-file must point to different files.\n");
         return 1;
     }
     fp = fopen(input_path, "rb");
@@ -299,6 +294,8 @@ int recover_stuff(int argc, char **argv) {
     fclose(fp);
     if (op != stdout) {
         fclose(op);
+    } else {
+        printf("\n");
     }
     return exit_code;
 }

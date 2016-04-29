@@ -29,7 +29,7 @@ you@SOMEWHERE:/over/the/rainbow# ./lit --task=recover --input-file=moby-nasty-di
 The hidden stuff will be always dumped to the ``stdout``. So, if you want this data dumped to another place use:
 
 ```
-you@SOMEWHERE:/over/the/rainbow# ./lit --task=recover --input-file=nasty-moby-dick.txt > nasty-encripted-elf
+you@SOMEWHERE:/over/the/rainbow# ./lit --task=recover --input-file=nasty-moby-dick.txt --output-file=nasty-encripted-elf
 ```
 
 As it had been said: simple!
