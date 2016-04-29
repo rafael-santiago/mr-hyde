@@ -11,7 +11,7 @@
 
 #define MAX_LINE_SIZE     0xffff
 
-#define USAGE_TIP "usage: %s --task=hide|recover [--input-file=<filepath> --output-file=<filepath> "\
+#define USAGE_TIP "usage: %s --task=hide|recover [--input-file=<filepath>|--input-buf=<data> --output-file=<filepath> "\
                   "--cover-file=<filepath>]\n"
 
 static char *get_next_line_from_file(FILE *fp);
@@ -24,15 +24,15 @@ static int get_lines_total_from_file(FILE *fp);
 
 static long get_bytes_total_from_file(FILE *fp);
 
-static int has_enough_lines(FILE *input_fp, FILE *cover_fp);
+static int has_enough_lines(size_t input_bytes, FILE *cover_fp);
 
 static int hide_byte(const unsigned char byte, FILE *cover_fp, FILE *output_fp);
 
-static int hide(const char *input_path, const char *cover_path, const char *output_path);
+static int hide(const char *input_buf, const size_t input_buf_size, const char *cover_path, const char *output_path);
 
 static unsigned char recover_byte(FILE *input_fp);
 
-static int recover(const char *input_path, const char *output_path);
+static int recover(FILE *input_fp, FILE *output_fp);
 
 static char *get_option(const char *option, char **argv, int argc);
 
@@ -91,8 +91,7 @@ static long get_bytes_total_from_file(FILE *fp) {
     return t;
 }
 
-static int has_enough_lines(FILE *input_fp, FILE *cover_fp) {
-    long input_bytes = get_bytes_total_from_file(input_fp);
+static int has_enough_lines(size_t input_bytes, FILE *cover_fp) {
     int cover_lines_total = get_lines_total_from_file(cover_fp);
     return  ((input_bytes * 8 + (sizeof(long) * 8)) <= cover_lines_total);
 }
@@ -111,59 +110,48 @@ static int hide_byte(const unsigned char byte, FILE *cover_fp, FILE *output_fp) 
     return 1;
 }
 
-static int hide(const char *input_path, const char *cover_path, const char *output_path) {
-    FILE *input_fp = NULL;
+static int hide(const char *input_buf, const size_t input_buf_size, const char *cover_path, const char *output_path) {
+    const char *ip = input_buf;
+    const char *ip_end = ip + input_buf_size;
     FILE *cover_fp = NULL;
     FILE *output_fp = NULL;
     unsigned char byte = 0;
-    long input_size = 0;
     int b = 0;
     int should_continue = 1;
-    if (input_path == NULL || cover_path == NULL || output_path == NULL) {
-        return 1;
-    }
-    input_fp = fopen(input_path, "rb");
-    if (input_fp == NULL) {
-        printf("ERROR: unable to read from \"%s\".\n", input_path);
+    if (input_buf == NULL || cover_path == NULL || output_path == NULL) {
         return 1;
     }
     output_fp = fopen(output_path, "wb");
     if (output_fp == NULL) {
-        fclose(input_fp);
         printf("ERROR: unable to write to \"%s\".\n", output_path);
         return 1;
     }
     cover_fp = fopen(cover_path, "rb");
     if (cover_fp == NULL) {
-        fclose(input_fp);
         fclose(output_fp);
         printf("ERROR: unable to read from \"%s\".\n", cover_path);
         return 1;
     }
-    if (!has_enough_lines(input_fp, cover_fp)) {
+    if (!has_enough_lines(input_buf_size, cover_fp)) {
         printf("ERROR: the cover file must be larger.\n");
-        fclose(input_fp);
         fclose(output_fp);
         fclose(cover_fp);
         remove(output_path);
         return 1;
     }
-    input_size = get_bytes_total_from_file(input_fp);
-    b = sizeof(input_size) - 1;
+    b = sizeof(input_buf_size) - 1;
     while (b > -1 && should_continue) {
-        byte = input_size >> (8 * b);
+        byte = input_buf_size >> (8 * b);
         should_continue = hide_byte(byte, cover_fp, output_fp);
         b--;
     }
-    byte = fgetc(input_fp);
-    while (!feof(input_fp) && should_continue) {
-        should_continue = hide_byte(byte, cover_fp, output_fp);
-        byte = fgetc(input_fp);
+    while (ip != ip_end && should_continue) {
+        should_continue = hide_byte(*ip, cover_fp, output_fp);
+        ip++;
     }
     if (should_continue) {
         while (hide_byte(0, cover_fp, output_fp));
     }
-    fclose(input_fp);
     fclose(output_fp);
     fclose(cover_fp);
     return (should_continue) ? 0 : 1;
@@ -185,22 +173,12 @@ static unsigned char recover_byte(FILE *input_fp) {
     return retval;
 }
 
-static int recover(const char *input_path, const char *output_path) {
-    FILE *input_fp;
-    FILE *output_fp;
+static int recover(FILE *input_fp, FILE *output_fp) {
     long output_size = 0;
     char *line = NULL;
     unsigned char byte = 0;
     int b = 0;
-    input_fp = fopen(input_path, "rb");
     if (input_fp == NULL) {
-        printf("ERROR: unale to read from \"%s\".\n", input_path);
-        return 1;
-    }
-    output_fp = fopen(output_path, "wb");
-    if (output_fp == NULL) {
-        fclose(input_fp);
-        printf("ERROR: unable to write to \"%s\".\n", output_path);
         return 1;
     }
     byte = recover_byte(input_fp);
@@ -215,8 +193,6 @@ static int recover(const char *input_path, const char *output_path) {
         fprintf(output_fp, "%c", byte);
         byte = recover_byte(input_fp);
     }
-    fclose(input_fp);
-    fclose(output_fp);
     return 0;
 }
 
@@ -238,10 +214,96 @@ static char *get_option(const char *option, char **argv, int argc) {
     return NULL;
 }
 
-int main(int argc, char **argv) {
-    char *input_path = NULL;
+int hide_stuff(int argc, char **argv) {
+    FILE *fp = NULL;
+    int exit_code = 1;
+    char *option = NULL;
+    char *input_buf = NULL;
     char *output_path = NULL;
     char *cover_path = NULL;
+    size_t input_buf_size = 0;
+    if ((option = get_option("input-path", argv, argc)) != NULL) {
+        fp = fopen(option, "rb");
+        if (fp == NULL) {
+            printf("ERROR: unable to open the file \"%s\".\n", option);
+            return 1;
+        }
+        fseek(fp, 0L, SEEK_END);
+        input_buf_size = ftell(fp);
+        fseek(fp, 0L, SEEK_SET);
+        input_buf = (char *) malloc(input_buf_size + 1);
+        if (input_buf == NULL) {
+            printf("PANIC: no memory.\n");
+            exit(1);
+        }
+        fread(input_buf, 1, input_buf_size, fp);
+    } else if ((input_buf = get_option("input-buf", argv, argc)) != NULL) {
+        input_buf_size = strlen(input_buf);
+    } else {
+        printf("OPTION PARSING ERROR: --input-path=<filepath> or --input-buf=<data> must be supplied.\n");
+        return 1;
+    }
+    output_path = get_option("output-path", argv, argc);
+    if (output_path == NULL) {
+        printf("OPTION PARSING ERROR: --output-path=<filepath> must be supplied.\n");
+        return 1;
+    }
+    cover_path = get_option("cover-path", argv, argc);
+    if (cover_path == NULL) {
+        printf("OPTION PARSING ERROR: --cover-path=<filepath> must be supplied.\n");
+        return 1;
+    }
+/*    if (strcmp(input_path, cover_path) == 0 || strcmp(output_path, input_path) == 0 ||
+        strcmp(cover_path, output_path) == 0) {
+        printf("ERROR: --cover-path, --input-path and --output-path must point to different files.\n");
+        return 1;
+    }*/
+    exit_code = hide(input_buf, input_buf_size, cover_path, output_path);
+    if (fp != NULL) {
+        fclose(fp);
+        free(input_buf);
+    }
+    return exit_code;
+}
+
+int recover_stuff(int argc, char **argv) {
+    char *input_path = NULL;
+    char *output_path = NULL;
+    FILE *fp = NULL;
+    FILE *op = stdout;
+    int exit_code = 1;
+    input_path = get_option("input-path", argv, argc);
+    if (input_path == NULL) {
+        printf("OPTION PARSING ERROR: --input-path=<filepath> must be supplied.\n");
+        return 1;
+    }
+    output_path = get_option("output-path", argv, argc);
+    if (output_path != NULL && strcmp(input_path, output_path) == 0) {
+        printf("ERROR: --input-path and --output-path must point to different files.\n");
+        return 1;
+    }
+    fp = fopen(input_path, "rb");
+    if (fp == NULL) {
+        printf("ERROR: unable to read file \"%s\".\n", input_path);
+        return 1;
+    }
+    if (output_path != NULL) {
+        op = fopen(output_path, "wb");
+        if (op == NULL) {
+            fclose(fp);
+            printf("ERROR: unable to write to \"%s\".\n", output_path);
+            return 1;
+        }
+    }
+    exit_code = recover(fp, op);
+    fclose(fp);
+    if (op != stdout) {
+        fclose(op);
+    }
+    return exit_code;
+}
+
+int main(int argc, char **argv) {
     char *task = NULL;
     if (argc == 1) {
         printf(USAGE_TIP, argv[0]);
@@ -253,43 +315,9 @@ int main(int argc, char **argv) {
         return 1;
     }
     if (strcmp(task, "hide") == 0) {
-        input_path = get_option("input-path", argv, argc);
-        if (input_path == NULL) {
-            printf("OPTION PARSING ERROR: --input-path=<filepath> must be supplied.\n");
-            return 1;
-        }
-        output_path = get_option("output-path", argv, argc);
-        if (output_path == NULL) {
-            printf("OPTION PARSING ERROR: --output-path=<filepath> must be supplied.\n");
-            return 1;
-        }
-        cover_path = get_option("cover-path", argv, argc);
-        if (cover_path == NULL) {
-            printf("OPTION PARSING ERROR: --cover-path=<filepath> must be supplied.\n");
-            return 1;
-        }
-        if (strcmp(input_path, cover_path) == 0 || strcmp(output_path, input_path) == 0 ||
-            strcmp(cover_path, output_path) == 0) {
-            printf("ERROR: --cover-path, --input-path and --output-path must point to different files.\n");
-            return 1;
-        }
-        return hide(input_path, cover_path, output_path);
+        return hide_stuff(argc, argv);
     } else if (strcmp(task, "recover") == 0) {
-        input_path = get_option("input-path", argv, argc);
-        if (input_path == NULL) {
-            printf("OPTION PARSING ERROR: --input-path=<filepath> must be supplied.\n");
-            return 1;
-        }
-        output_path = get_option("output-path", argv, argc);
-        if (output_path == NULL) {
-            printf("OPTION PARSING ERROR: --output-path=<filepath> must be supplied.\n");
-            return 1;
-        }
-        if (strcmp(input_path, output_path) == 0) {
-            printf("ERROR: --input-path and --output-path must point to different files.\n");
-            return 1;
-        }
-        return recover(input_path, output_path);
+        return recover_stuff(argc, argv);
     } else {
         printf("OPTION PARSING ERROR: \"%s\" is a unknown task.\n", task);
         return 1;

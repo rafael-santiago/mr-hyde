@@ -1,1 +1,1 @@
---forgefiles=Forgefile.hsl --Forgefile-projects=lit --bin-output-dir=../../../bin --obj-output-dir=obj
+--forgefiles=Forgefile.hsl --Forgefile-projects=lit --bin-output-dir=../../../bin --obj-output-dir=o
