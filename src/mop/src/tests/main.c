@@ -215,6 +215,7 @@ CUTE_TEST_CASE(steg_tests)
         { "ain't got no feelings to bruise"                                                          },
         { "ain't got no telephone numbers"                                                           },
         { "I ain't got nothing but the blues."                                                       },
+        { "a sombra do mundo murmurastes um protesto timido, mas virao outros..."                    },
         { "I've got the world on a string, sittin' on a rainbow"                                     },
         { "Got the string around my finger"                                                          },
         { "What a world, what a life, I'm in love"                                                   },

@@ -1,0 +1,8 @@
+[submodule "src/vegas/src/accacia"]
+	path = src/vegas/src/accacia
+	url = https://github.com/rafael-santiago/accacia
+	branch = master
+[submodule "src/mop/src/tests/cutest"]
+	path = src/mop/src/tests/cutest
+	url = https://github.com/rafael-santiago/cutest
+	branch = master
