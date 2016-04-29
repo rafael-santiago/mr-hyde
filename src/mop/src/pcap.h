@@ -1,5 +1,5 @@
-#ifndef PCAP_PCAP_H
-#define PCAP_PCAP_H 1
+#ifndef MOP_PCAP_H
+#define MOP_PCAP_H 1
 
 #include "types.h"
 

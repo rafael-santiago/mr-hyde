@@ -1,5 +1,5 @@
-#ifndef PCAP_PKTSLICER_H
-#define PCAP_PKTSLICER_H 1
+#ifndef MOP_PKTSLICER_H
+#define MOP_PKTSLICER_H 1
 
 #include <stdlib.h>
 

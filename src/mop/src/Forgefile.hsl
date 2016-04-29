@@ -13,13 +13,13 @@ var cflags type list;
 var libpath type list;
 var ldflags type list;
 
-project pcap : toolset "gcc-c-app" : dependencies get_c_cpp_deps() : $src, $incpath, $cflags, $libpath, $ldflags, "pcap";
+project mop : toolset "gcc-c-app" : dependencies get_c_cpp_deps() : $src, $incpath, $cflags, $libpath, $ldflags, "mop";
 
-pcap.prologue() {
+mop.prologue() {
     $src.ls(".*\\.c$");
 }
 
-pcap.epilogue() {
+mop.epilogue() {
     var code type int;
     $code = 1;
     if (hefesto.sys.last_forge_result() == 0) {

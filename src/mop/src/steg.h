@@ -1,5 +1,5 @@
-#ifndef PCAP_STEG_H
-#define PCAP_STEG_H 1
+#ifndef MOP_STEG_H
+#define MOP_STEG_H 1
 
 #include "types.h"
 #include <stdlib.h>

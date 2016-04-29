@@ -1,5 +1,5 @@
-#ifndef PCAP_CHSUM_H
-#define PCAP_CHSUM_H 1
+#ifndef MOP_CHSUM_H
+#define MOP_CHSUM_H 1
 
 #include <stdlib.h>
 

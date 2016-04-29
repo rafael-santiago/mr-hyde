@@ -1,5 +1,5 @@
-#ifndef PCAP_TYPES_H
-#define PCAP_TYPES_H 1
+#ifndef MOP_TYPES_H
+#define MOP_TYPES_H 1
 
 typedef struct _pcap_global_header_t {
     unsigned int magic_number;
