@@ -6,11 +6,11 @@
 #include "../steg.h"
 #include "../chsum.h"
 
-void printp(unsigned char *p, size_t ps) {
-    size_t s;
-    for (s = 0; s < ps; s++) printf("%.2x ", p[s]);
-    printf("\n");
-}
+//void printp(unsigned char *p, size_t ps) {
+//    size_t s;
+//    for (s = 0; s < ps; s++) printf("%.2x ", p[s]);
+//    printf("\n");
+//}
 
 CUTE_TEST_CASE(chsum_tests)
     unsigned char ip_packet[] = {

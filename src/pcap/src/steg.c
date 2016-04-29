@@ -79,7 +79,7 @@ int hide_buf(const char *input_buffer, size_t input_buffer_size, pcap_file_ctx *
                 continue;
             }
             bit = get_bit_from_byte(*ip, b);
-            set_pkt_field("tcp.reserv", rp->data, rp->hdr.incl_len, (bit == 0) ? 0x80 : 0x81);
+            set_pkt_field("tcp.reserv", rp->data, rp->hdr.incl_len, (bit == 0) ? 0x80 : 0x82);
             reval_tcp_ip_chsums(rp->data, rp->hdr.incl_len);
             b = (b+1) % 8;
             if (b == 0) {
@@ -117,7 +117,7 @@ char *recover_buf(pcap_file_ctx *pcap_file, size_t *output_size) {
             rp = rp->next;
             continue;
         }
-        plaintext_size = plaintext_size << 1 | ((*data) == 0x04 ? 1 : 0);
+        plaintext_size = plaintext_size << 1 | ((*data) == 0x08 ? 1 : 0);
         b++;
         rp = rp->next;
     }
@@ -142,7 +142,7 @@ char *recover_buf(pcap_file_ctx *pcap_file, size_t *output_size) {
             rp = rp->next;
             continue;
         }
-        *p = (*p) << 1 | ((*data) == 0x04 ? 1 : 0);
+        *p = (*p) << 1 | ((*data) == 0x08 ? 1 : 0);
         b = (b + 1) % 8;
         if ((b % 8) == 0) {
             p++;
