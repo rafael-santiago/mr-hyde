@@ -38,7 +38,7 @@ doctor@TARDIS:~/github/mr-hyde/src# hefesto
 A recursive forge will be started and after you will get all binaries that you need inside the ``../bin`` path.
 
 If for some reason you want to run just a specific sub-project's forge you need to invoke ``hefesto`` being inside the
-wanted subproject's ``src`` sub-directory:
+wanted sub-project's ``src`` sub-directory:
 
 ```
 doctor@TARDIS:~/github/mr-hyde# cd src/lit/src
