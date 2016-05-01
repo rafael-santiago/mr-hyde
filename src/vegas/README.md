@@ -1,6 +1,6 @@
 # vegas
 
-``vegas`` is a tool that uses ``Ansi Color Coding`` to hide things. As a result you can get a stupid ``hiper-colored`` output.
+``vegas`` is a tool that uses ``Ansi Color Coding`` to hide things. As a result you can get a stupid ``hyper-colored`` output.
 Let's use this bluff to hide things.
 
 ## Usage
