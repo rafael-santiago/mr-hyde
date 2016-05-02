@@ -159,9 +159,6 @@ int help(const int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-//    pcap_file_ctx *file = ld_pcap_file(get_option("pcap-file", argc, argv));
-//    close_pcap_file(file);
-//    printf("%s\n", get_option("pcap-file", argc, argv));
     char *task = NULL;
     if (get_boolean_option("help", argc, argv) != NULL) {
         return help(argc, argv);

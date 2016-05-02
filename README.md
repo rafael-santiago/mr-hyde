@@ -1,6 +1,6 @@
 # Mr hyde
 
-![Photo by Henry Van der Weyde (1838-1924) / Public Domain](https://github.com/rafael-santiago/mr-hyde/blob/master/etc/Jekyll-mansfield.jpg)
+![Photo by Henry Van der Weyde (1838-1924) / Public Domain](https://github.com/rafael-santiago/mr-hyde/blob/master/etc/Jekyll-mansfield.jpg Photo by Henry Van der Weyde (1838-1924) / Public Domain)
 
 ## What is this?
 
