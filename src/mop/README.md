@@ -1,6 +1,6 @@
 # mop
 
-This tool that performs steganography using ``pcap`` files.
+This tool performs steganography using ``pcap`` files.
 
 The name is originated from a lousy acronym: ``m``ore ``o``ver [this] ``p``cap.
 
