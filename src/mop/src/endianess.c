@@ -8,6 +8,6 @@
 #include "endianess.h"
 
 int little_endian() {
-    unsigned int m = 0x00000001;
-    return (*(&m) & 1);
+    unsigned char *m = "\x00\x00\x00\x01";
+    return (*((unsigned int *)(m)) >> 24);
 }
