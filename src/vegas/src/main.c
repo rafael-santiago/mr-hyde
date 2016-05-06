@@ -39,8 +39,8 @@ static ACCACIA_TEXT_COLOR get_fgcolor_from_esc_code(const char *esc_code);
 static int little_endian_cpu();
 
 static int little_endian_cpu() {
-    int is = 1;
-    return *(&is);
+    unsigned char *is = "\x00\x00\x00\x01";
+    return (*((unsigned int *)(is)) >> 24);
 }
 
 static const char *hide_bits(const unsigned char byte, const char *cover_buf, const char *cover_buf_end, const char *cover_buf_next) {

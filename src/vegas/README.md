@@ -22,7 +22,7 @@ you@SOMEWHERE:/over/the/rainbow# ./vegas --task=hide --input-buf="Meet me at the
 Now supposing that your hidden message is inside ``carroll_poem.txt`` file and you want to recover it. You should try:
 
 ```
-you@SOMEWHERE:/over/the/rainbow# ./vegas --task=recover --input-buf=carroll_poem.txt
+you@SOMEWHERE:/over/the/rainbow# ./vegas --task=recover --input-file=carroll_poem.txt
 ```
 
 You will see the hidden message at your terminal screen.
