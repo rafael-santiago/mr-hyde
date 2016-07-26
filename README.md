@@ -29,7 +29,19 @@ Now this repo is ready for the build stage.
 ## The build stage
 
 In order to build the sub-projects implemented here you need to use [Hefesto](https://github.com/rafael-santiago/hefesto).
-Once Hefesto installed and working on your system, just move to the higher ``src`` sub-directory and:
+Once Hefesto installed and working on your system, you need to install the extension ``forge-bootstrapper``. To install
+it you need to clone [Helios](https://github.com/rafael-santiago/helios). Following, you get the exact steps for installing
+the ``forge-bootstrapper``:
+
+```
+doctor@TARDIS:~/github# git clone https://github.com/rafael-santiago/helios helios
+doctor@TARDIS:~/github# cd helios
+doctor@TARDIS:~/github/helios# hefesto --install=forge-bootstrapper
+```
+
+All done here, now your ``Hefesto``'s installed copy know how to run recursive forges.
+
+Backing to the ``mr-hyde``, just move to the ``mr-hyde src's`` toplevel sub-directory and call for ``Hefesto`` from there:
 
 ```
 doctor@TARDIS:~/github/mr-hyde/src# hefesto
@@ -37,7 +49,7 @@ doctor@TARDIS:~/github/mr-hyde/src# hefesto
 
 A recursive forge will be started and after you will get all binaries that you need inside the ``../bin`` path.
 
-If for some reason you want to run just a specific sub-project's forge you need to invoke ``hefesto`` being inside the
+If for some reason you want to run only a specific sub-project's forge you need to invoke ``hefesto`` being inside the
 wanted sub-project's ``src`` sub-directory:
 
 ```
